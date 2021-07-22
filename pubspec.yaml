@@ -39,6 +39,7 @@ dependencies:
   intl_utils: ^2.3.0
   provider: ^5.0.0
   sizer: ^2.0.13
+  background_fetch: ^1.0.1
 
 dependency_overrides:
   sqflite:

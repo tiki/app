@@ -1,3 +1,4 @@
+import 'package:app/src/slices/api_background/api_background_service.dart';
 import 'package:app/src/slices/api_blockchain/api_blockchain_service.dart';
 import 'package:app/src/slices/api_bouncer/api_bouncer_service.dart';
 import 'package:app/src/slices/api_company/api_company_service.dart';
@@ -37,6 +38,13 @@ Future<void> main() async {
       ApiCompanyService(apiCompanyIndexService);
   ApiSenderService apiSenderService = ApiSenderService();
   ApiMessageService apiMessageService = ApiMessageService();
+  ApiBackgroundService apiBackgroundService = ApiBackgroundService(
+    googleService: apiGoogleService,
+    companyService: apiCompanyService,
+    senderService: apiSenderService,
+    messageService: apiMessageService,
+  );
+  ApiSignupService apiSignupService = ApiSignupService();
 
   await loginFlowService.initialize(
       apiUserService: apiUserService,
@@ -56,12 +64,13 @@ Future<void> main() async {
       Provider<ApiUserService>.value(value: apiUserService),
       Provider<ApiBouncerService>.value(value: apiBouncerService),
       Provider<ApiBlockchainService>.value(value: apiBlockchainService),
-      Provider<ApiSignupService>(create: (_) => ApiSignupService()),
+      Provider<ApiSignupService>.value(value: apiSignupService),
       Provider<ApiGoogleService>.value(value: apiGoogleService),
       Provider<ApiCompanyIndexService>.value(value: apiCompanyIndexService),
       Provider<ApiCompanyService>.value(value: apiCompanyService),
       Provider<ApiSenderService>.value(value: apiSenderService),
       Provider<ApiMessageService>.value(value: apiMessageService),
+      Provider<ApiBackgroundService>.value(value: apiBackgroundService)
     ],
     child: App(loginFlowService),
   ));
