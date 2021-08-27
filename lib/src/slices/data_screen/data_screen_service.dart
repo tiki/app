@@ -47,4 +47,9 @@ class DataScreenService extends ChangeNotifier {
   Future<List<InfoCarouselCardModel>> getGmailCards() async {
     return await _googleService.gmailInfoCards();
   }
+
+  Future<void> linkAccount(String providerName) async {
+    _dataBkgService.addAccount(providerName);
+    notifyListeners();
+  }
 }

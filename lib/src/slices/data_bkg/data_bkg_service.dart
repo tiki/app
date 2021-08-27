@@ -4,12 +4,15 @@
  */
 
 import 'package:flutter/widgets.dart';
+import 'package:flutter_appauth/flutter_appauth.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:logging/logging.dart';
 
 import '../api_app_data/api_app_data_key.dart';
 import '../api_app_data/api_app_data_service.dart';
 import '../api_app_data/model/api_app_data_model.dart';
+import '../api_auth_service/api_auth_service.dart';
+import '../api_auth_service/model/api_auth_service_account_model.dart';
 import '../api_company/api_company_service.dart';
 import '../api_company/model/api_company_model_local.dart';
 import '../api_email_msg/api_email_msg_service.dart';
@@ -28,17 +31,20 @@ class DataBkgService extends ChangeNotifier {
   final ApiEmailSenderService _apiEmailSenderService;
   final ApiGoogleService _apiGoogleService;
   final ApiAppDataService _apiAppDataService;
+  final ApiAuthService _apiAuthService;
 
   DataBkgService(
       {required ApiGoogleService apiGoogleService,
       required ApiCompanyService apiCompanyService,
       required ApiEmailMsgService apiEmailMsgService,
       required ApiEmailSenderService apiEmailSenderService,
-      required ApiAppDataService apiAppDataService})
+      required ApiAppDataService apiAppDataService,
+      required ApiAuthService apiAuthService})
       : this._apiGoogleService = apiGoogleService,
         this._apiCompanyService = apiCompanyService,
         this._apiEmailMsgService = apiEmailMsgService,
         this._apiEmailSenderService = apiEmailSenderService,
+        this._apiAuthService = apiAuthService,
         this._apiAppDataService = apiAppDataService {
     checkGmail();
   }
@@ -79,6 +85,7 @@ class DataBkgService extends ChangeNotifier {
       }
       await _apiAppDataService.save(
           ApiAppDataKey.gmailLastFetch, run.millisecondsSinceEpoch.toString());
+      await _apiAppDataService.save(ApiAppDataKey.gmailPage, '');
       _log.fine(
           'Gmail fetch completed on: ' + DateTime.now().toIso8601String());
     }
@@ -206,6 +213,25 @@ class DataBkgService extends ChangeNotifier {
     return periodSplit[periodSplit.length - 2] +
         "." +
         periodSplit[periodSplit.length - 1];
+  }
+
+  Future<void> addAccount(String providerName,
+      {List<String> aditionalScopes = const []}) async {
+    List<String> scopes = [...aditionalScopes, "openid", "profile", "email"];
+    AuthorizationTokenResponse? tokenResponse = await _apiAuthService
+        .authorizeAndExchangeCode(providerName: providerName, scopes: scopes);
+    if (tokenResponse != null) {
+      // TODO get account data to get username
+      ApiAuthServiceAccountModel apiAuthServiceAccountModel =
+          ApiAuthServiceAccountModel(
+              provider: providerName,
+              accessToken: tokenResponse.accessToken,
+              accessTokenExpiration: tokenResponse
+                  .accessTokenExpirationDateTime?.millisecondsSinceEpoch,
+              refreshToken: tokenResponse.refreshToken,
+              shouldReconnect: 0);
+      await _apiAuthService.upsert(apiAuthServiceAccountModel);
+    }
   }
 
   String _gmailBuildQuery(int? fetchEpochInMilliseconds, String category) {

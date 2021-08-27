@@ -15,6 +15,7 @@ import '../../utils/api/helper_api_rsp.dart';
 import '../../utils/api/helper_api_utils.dart';
 import '../../utils/helper_db.dart';
 import '../api_app_data/api_app_data_service.dart';
+import '../api_auth_service/api_auth_service.dart';
 import '../api_blockchain/api_blockchain_service.dart';
 import '../api_blockchain/model/api_blockchain_model_address_req.dart';
 import '../api_blockchain/model/api_blockchain_model_address_rsp.dart';
@@ -246,6 +247,7 @@ class LoginFlowService extends ChangeNotifier {
         ApiEmailMsgService(database: database);
     ApiCompanyService apiCompanyService =
         ApiCompanyService(database: database, helperApiAuth: _helperApiAuth);
+    ApiAuthService apiAuthService = ApiAuthService(database: database);
 
     ApiGoogleService apiGoogleService = ApiGoogleService();
     registerLogout(() async => await apiGoogleService.signOut());
@@ -255,7 +257,8 @@ class LoginFlowService extends ChangeNotifier {
         apiCompanyService: apiCompanyService,
         apiEmailSenderService: apiEmailSenderService,
         apiGoogleService: apiGoogleService,
-        apiAppDataService: apiAppDataService);
+        apiAppDataService: apiAppDataService,
+        apiAuthService: apiAuthService);
 
     _providers = [
       Provider<ApiCompanyService>.value(value: apiCompanyService),

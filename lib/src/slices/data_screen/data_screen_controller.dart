@@ -43,4 +43,8 @@ class DataScreenController {
       await service.addGoogleAccount();
     return homeScreenService.showOverlay(apiAppDataService);
   }
+
+  linkAccount(String providerName) async {
+   service.linkAccount(providerName);
+  }
 }
